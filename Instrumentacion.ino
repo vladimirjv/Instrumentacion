@@ -12,7 +12,7 @@
 #define button 11
 #define CLK 10
 #define DIO 9
-
+//
 const uint8_t SEGA[] = {  
   0x0,  
   0x0,  
@@ -32,8 +32,8 @@ const uint8_t SEGS[] = {
 const uint8_t data[] = {0x0, 0x0, 0x0, 0x0};
 const byte Filas = 2;     //Cuatro filas 
 const byte Cols = 2;    //Cuatro columnas
-byte Pins_Filas[] = {5,4};   //Pines Arduino a los que contamos las filas. 
-byte Pins_Cols[] = {3,2};  // Pines Arduino a los que contamos las columnas. 
+byte Pins_Filas[] = {3,2};   //Pines Arduino a los que contamos las filas. 
+byte Pins_Cols[] = {4,5};  // Pines Arduino a los que contamos las columnas. 
 char Teclas [ Filas ][ Cols ] = 
 {  
   {'1','2'},  
@@ -55,8 +55,8 @@ boolean state;
 
 ThreadController controll = ThreadController();
 Thread* analogReads = new Thread();
-Thread* main = new Thread();
-Thread* displayThread =new  Thread(); 
+Thread main =  Thread();
+//Thread* displayThread =new  Thread(); 
 
 //thread function
 void analogReadsCallback(){
@@ -90,10 +90,10 @@ void mainCallback(){
     Apaga();
   }
 }
-void displayThreadCallback(){
-  display.showNumberDec (TempAmbiente,false,2,0);  
-  display.setSegments(SEGA);
-}
+//void displayThreadCallback(){
+//  display.showNumberDec (TempAmbiente,false,2,0);  
+//  display.setSegments(SEGA);
+//}
 
 //funciones
 int temperatura(int sensor){
@@ -122,20 +122,21 @@ void setup() {
   pinMode(Compresor,OUTPUT);
   pinMode(OnOff, OUTPUT);
   Serial.begin(9600);
-  teclado.addEventListener(keypadEvent);
-  display.setBrightness (0x0f);
+  //teclado.addEventListener(keypadEvent);
+  //display.setBrightness (0x0f);
   
   analogReads->onRun(analogReadsCallback);
-  analogReads->setInterval(100);
+  analogReads->setInterval(200);
 
-  main->onRun(mainCallback);
-  main->setInterval(500);
+  main.onRun(mainCallback);
+  main.setInterval(500);
 
-  displayThread->onRun(displayThreadCallback);
-  displayThread->setInterval(500);
+  //displayThread->onRun(displayThreadCallback);
+  //displayThread->setInterval(500);
   
   controll.add(analogReads);
-  controll.add(main);
+  controll.add(&main);
+  //controll.add(displayThread);
 }
 
 void loop() {
@@ -148,7 +149,7 @@ void loop() {
       digitalWrite(OnOff, state);
     }
 }
-
+//
 void keypadEvent (KeypadEvent eKey)
 {
   switch (teclado.getState())
@@ -156,7 +157,7 @@ void keypadEvent (KeypadEvent eKey)
     case PRESSED:
     Serial.print(eKey);
     switch(eKey)
-    {
+    { 
       case '1':
       display.setSegments(data);    
       tempReq++;
